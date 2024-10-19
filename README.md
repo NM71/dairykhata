@@ -16,7 +16,18 @@ It includes:
   <tr>
     <td>Splash Screen</td>
      <td>Home Screen</td>
-     <td>CRUD Operations</td>
+     <td>Add Record</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/IMG-20241019-WA0010.jpg" width=270 height=480></td>
+    <td><img src="screenshots/IMG-20241019-WA0009.jpg" width=270 height=480></td>
+    <td><img src="screenshots/WhatsApp Image 2024-10-19 at 14.36.27_6431d8d4" width=270 height=480></td>
+  </tr>
+  <br>
+  <tr>
+    <td>Local Records</td>
+     <td>Milk Rates</td>
+     <td>Reciept Generation</td>
   </tr>
   <tr>
     <td><img src="screenshots/IMG-20241019-WA0010.jpg" width=270 height=480></td>
