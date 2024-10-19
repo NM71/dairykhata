@@ -21,17 +21,17 @@ It includes:
   <tr>
     <td><img src="screenshots/IMG-20241019-WA0010.jpg" width=270 height=480></td>
     <td><img src="screenshots/IMG-20241019-WA0009.jpg" width=270 height=480></td>
-    <td><img src="screenshots/WhatsApp Image 2024-10-19 at 14.36.27_6431d8d4" width=270 height=480></td>
+    <td><img src="screenshots/WhatsApp Image 2024-10-19 at 14.36.27_6431d8d4.jpg" width=270 height=480></td>
   </tr>
   <br>
   <tr>
     <td>Local Records</td>
      <td>Milk Rates</td>
-     <td>Reciept Generation</td>
+     <td>Reciept Generation (based on timeline)</td>
   </tr>
   <tr>
-    <td><img src="screenshots/IMG-20241019-WA0010.jpg" width=270 height=480></td>
-    <td><img src="screenshots/Screenshot_1582745125.png" width=270 height=480></td>
-    <td><img src="screenshots/Screenshot_1582745139.png" width=270 height=480></td>
+    <td><img src="screenshots/IMG-20241019-WA0011.jpg" width=270 height=480></td>
+    <td><img src="screenshots/IMG-20241019-WA0012.jpg" width=270 height=480></td>
+    <td><img src="screenshots/IMG-20241019-WA0006.jpg" width=270 height=480></td>
   </tr>
  </table>
