@@ -1,114 +1,125 @@
 import 'package:dairykhata/models/milk_type_adapter.dart';
-import 'package:dairykhata/pages/add_record_page.dart';
-import 'package:dairykhata/pages/view_records_page.dart';
+import 'package:dairykhata/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final _settingsBox = Hive.box('settings');
-
-  double _cowMilkRate = 0.0;
-  double _buffaloMilkRate = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _cowMilkRate = _settingsBox.get('cowMilkRate', defaultValue: 0.0);
-    _buffaloMilkRate = _settingsBox.get('buffaloMilkRate', defaultValue: 0.0);
-  }
-
+class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage('images/dairybook.png'), fit: BoxFit.cover),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: PreferredSize(
-          preferredSize: const Size(double.infinity, 70),
-          child: AppBar(
-            backgroundColor: const Color(0xff0e2a62),
-            elevation: 0,
-            title: const Text(
-              'DairyBook',
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: 40,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+    final totalQuantity = ref.watch(totalQuantityProvider);
+    final totalEarnings = ref.watch(totalEarningsProvider);
+    final recentRecords = ref.watch(recentRecordsCountProvider);
+
+    print(
+        '🏠 HomePage: Building with totalQuantity=$totalQuantity, totalEarnings=$totalEarnings, recentRecords=$recentRecords');
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: PreferredSize(
+        preferredSize: const Size(double.infinity, 70),
+        child: AppBar(
+          backgroundColor: const Color(0xff0e2a62).withOpacity(0.8),
+          elevation: 0,
+          title: const Text(
+            'DairyBook',
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 40,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
-            centerTitle: true,
           ),
+          centerTitle: true,
         ),
-        body: Center(
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(12),
-                ),
-                onPressed: () => _navigateTo(context, const AddRecordPage()),
-                child: const Text(
-                  'Add Record',
-                  style: TextStyle(color: Color(0xff113370), fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+              // Insights Cards
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInsightCard(
+                      'Total Milk',
+                      '${totalQuantity.toStringAsFixed(1)} L',
+                      Icons.local_drink,
+                      Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildInsightCard(
+                      'Total Earnings',
+                      'Rs.${totalEarnings.toStringAsFixed(0)}',
+                      Icons.attach_money,
+                      Colors.green,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInsightCard(
+                      'Recent Records',
+                      '$recentRecords',
+                      Icons.history,
+                      Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildInsightCard(
+                      'This Week',
+                      '${totalQuantity.toStringAsFixed(1)} L',
+                      Icons.calendar_view_week,
+                      Colors.purple,
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(12),
+              const SizedBox(height: 40),
+              // Action Buttons
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => _generateReceipt(context),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.receipt, color: Color(0xff113370)),
+                      SizedBox(width: 8),
+                      Text(
+                        'Generate Receipt',
+                        style: TextStyle(
+                            color: Color(0xff113370),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
-                onPressed: () => _navigateTo(context, const ViewRecordsPage()),
-                child: const Text(
-                  'View Records',
-                  style: TextStyle(color: Color(0xff113370), fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(12),
-                ),
-                onPressed: _showSetRatesDialog,
-                child: const Text(
-                  'Set Milk Rates',
-                  style: TextStyle(color: Color(0xff113370), fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(12),
-                ),
-                onPressed: () => _generateReceipt(context),
-                child: const Text(
-                  'Generate Receipt',
-                  style: TextStyle(color: Color(0xff113370), fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
               ),
             ],
           ),
@@ -117,48 +128,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _navigateTo(BuildContext context, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-  }
-
-  void _showSetRatesDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Set Milk Rates'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+  Widget _buildInsightCard(
+      String title, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
-            TextField(
-              decoration: const InputDecoration(labelText: 'Cow Milk Rate'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) =>
-                  _cowMilkRate = double.tryParse(value) ?? 0.0,
-              controller: TextEditingController(text: _cowMilkRate.toString()),
+            Icon(icon, size: 32, color: color),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Buffalo Milk Rate'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) =>
-                  _buffaloMilkRate = double.tryParse(value) ?? 0.0,
-              controller:
-                  TextEditingController(text: _buffaloMilkRate.toString()),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _settingsBox.put('cowMilkRate', _cowMilkRate);
-              _settingsBox.put('buffaloMilkRate', _buffaloMilkRate);
-              Navigator.pop(context);
-              setState(() {});
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
   void _generateReceipt(BuildContext context) {
@@ -321,6 +324,10 @@ class _HomePageState extends State<HomePage> {
   void _generateAndPrintReceipt(int? days,
       {DateTime? startDate, DateTime? endDate}) async {
     final recordsBox = Hive.box<MilkRecord>('records');
+    final settings = ref.read(settingsNotifierProvider);
+    final cowRate = settings['cowMilkRate'] ?? 0.0;
+    final buffaloRate = settings['buffaloMilkRate'] ?? 0.0;
+
     final now = DateTime.now();
     startDate ??= now.subtract(Duration(days: days ?? 7));
     endDate ??= now;
@@ -378,9 +385,8 @@ class _HomePageState extends State<HomePage> {
                     }
                   }
 
-                  final cowTotalAmount = cowTotalQuantity * _cowMilkRate;
-                  final buffaloTotalAmount =
-                      buffaloTotalQuantity * _buffaloMilkRate;
+                  final cowTotalAmount = cowTotalQuantity * cowRate;
+                  final buffaloTotalAmount = buffaloTotalQuantity * buffaloRate;
 
                   // Add row for cow milk (if exists)
                   if (cowTotalQuantity > 0) {
@@ -389,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                           .format(date), // Only show date for the first row
                       'Cow',
                       cowTotalQuantity.toStringAsFixed(2),
-                      _cowMilkRate.toStringAsFixed(2),
+                      cowRate.toStringAsFixed(2),
                       cowTotalAmount.toStringAsFixed(2),
                     ]);
                   }
@@ -400,7 +406,7 @@ class _HomePageState extends State<HomePage> {
                       '', // Leave date empty
                       'Buffalo',
                       buffaloTotalQuantity.toStringAsFixed(2),
-                      _buffaloMilkRate.toStringAsFixed(2),
+                      buffaloRate.toStringAsFixed(2),
                       buffaloTotalAmount.toStringAsFixed(2),
                     ]);
                   }
@@ -410,7 +416,7 @@ class _HomePageState extends State<HomePage> {
               ),
               pw.SizedBox(height: 20),
               pw.Text(
-                  'Total Amount: ${records.fold<double>(0, (sum, record) => sum + record.quantity * (record.type == MilkType.cow ? _cowMilkRate : _buffaloMilkRate)).toStringAsFixed(2)}'),
+                  'Total Amount: ${records.fold<double>(0, (sum, record) => sum + record.quantity * (record.type == MilkType.cow ? cowRate : buffaloRate)).toStringAsFixed(2)}'),
             ],
           );
         },
