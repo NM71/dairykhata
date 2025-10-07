@@ -149,169 +149,175 @@ class _HomePageState extends ConsumerState<HomePage> {
           centerTitle: true,
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(padding),
-          child: Column(
-            children: [
-              // Single Insights Card with dropdown and two sub-cards
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Dropdown selector
-                      Row(
-                        children: [
-                          const Icon(Icons.date_range,
-                              color: Color(0xff0e2a62)),
-                          const SizedBox(width: 8),
-                          DropdownButton<TimePeriod>(
-                            value: _selectedPeriod,
-                            items: const [
-                              DropdownMenuItem(
-                                value: TimePeriod.allTime,
-                                child: Text('All Time'),
-                              ),
-                              DropdownMenuItem(
-                                value: TimePeriod.thisWeek,
-                                child: Text('This Week'),
-                              ),
-                              DropdownMenuItem(
-                                value: TimePeriod.thisMonth,
-                                child: Text('This Month'),
-                              ),
-                              DropdownMenuItem(
-                                value: TimePeriod.today,
-                                child: Text('Today'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedPeriod = value;
-                                  // Reset custom month start date when switching periods
-                                  if (value != TimePeriod.thisMonth) {
-                                    _customMonthStartDate = null;
-                                    _saveCustomMonthStartDate(null);
-                                  }
-                                });
-                                _saveSelectedPeriod(value);
-                              }
-                            },
-                            underline: Container(),
-                            style: TextStyle(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : const Color(0xff0e2a62),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Custom month start date selector
-                      if (_selectedPeriod == TimePeriod.thisMonth) ...[
-                        const SizedBox(height: 8),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+                left: padding,
+                right: padding,
+                top: padding,
+                bottom: padding + 86),
+            child: Column(
+              children: [
+                // Single Insights Card with dropdown and two sub-cards
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Dropdown selector
                         Row(
                           children: [
-                            const SizedBox(width: 32),
-                            Text(
-                              'Month Start: ${_customMonthStartDate != null ? DateFormat('MMM dd, yyyy').format(_customMonthStartDate!) : 'Current Month'}',
-                              style: const TextStyle(
-                                color: Color(0xff0e2a62),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            const Icon(Icons.date_range,
+                                color: Color(0xff0e2a62)),
                             const SizedBox(width: 8),
-                            IconButton(
-                              onPressed: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate:
-                                      _customMonthStartDate ?? DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (picked != null) {
+                            DropdownButton<TimePeriod>(
+                              value: _selectedPeriod,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: TimePeriod.allTime,
+                                  child: Text('All Time'),
+                                ),
+                                DropdownMenuItem(
+                                  value: TimePeriod.thisWeek,
+                                  child: Text('This Week'),
+                                ),
+                                DropdownMenuItem(
+                                  value: TimePeriod.thisMonth,
+                                  child: Text('This Month'),
+                                ),
+                                DropdownMenuItem(
+                                  value: TimePeriod.today,
+                                  child: Text('Today'),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
                                   setState(() {
-                                    _customMonthStartDate = picked;
+                                    _selectedPeriod = value;
+                                    // Reset custom month start date when switching periods
+                                    if (value != TimePeriod.thisMonth) {
+                                      _customMonthStartDate = null;
+                                      _saveCustomMonthStartDate(null);
+                                    }
                                   });
-                                  _saveCustomMonthStartDate(picked);
+                                  _saveSelectedPeriod(value);
                                 }
                               },
-                              icon: const Icon(
-                                Icons.calendar_today,
-                                color: Colors.white,
-                                size: 16,
+                              underline: Container(),
+                              style: TextStyle(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : const Color(0xff0e2a62),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Custom month start date selector
+                        if (_selectedPeriod == TimePeriod.thisMonth) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const SizedBox(width: 32),
+                              Text(
+                                'Month Start: ${_customMonthStartDate != null ? DateFormat('MMM dd, yyyy').format(_customMonthStartDate!) : 'Current Month'}',
+                                style: const TextStyle(
+                                  color: Color(0xff0e2a62),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate:
+                                        _customMonthStartDate ?? DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (picked != null) {
+                                    setState(() {
+                                      _customMonthStartDate = picked;
+                                    });
+                                    _saveCustomMonthStartDate(picked);
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        // Two cards in a row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildSubCard(
+                                'Total Milk',
+                                '${currentQuantity.toStringAsFixed(1)} L',
+                                Icons.local_drink,
+                                Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildSubCard(
+                                'Total Earnings',
+                                'Rs.${currentEarnings.toStringAsFixed(0)}',
+                                Icons.attach_money,
+                                Colors.green,
                               ),
                             ),
                           ],
                         ),
                       ],
-                      const SizedBox(height: 16),
-                      // Two cards in a row
-                      Row(
+                    ),
+                  ),
+                ),
+                SizedBox(height: isSmallScreen ? 32 : 40),
+                // Action Buttons
+                Center(
+                  child: SizedBox(
+                    width: isSmallScreen ? double.infinity : 280,
+                    child: ElevatedButton(
+                      onPressed: () => _generateReceipt(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: buttonPadding,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                            child: _buildSubCard(
-                              'Total Milk',
-                              '${currentQuantity.toStringAsFixed(1)} L',
-                              Icons.local_drink,
-                              Colors.blue,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildSubCard(
-                              'Total Earnings',
-                              'Rs.${currentEarnings.toStringAsFixed(0)}',
-                              Icons.attach_money,
-                              Colors.green,
+                          const Icon(Icons.receipt),
+                          SizedBox(width: isSmallScreen ? 6 : 8),
+                          Text(
+                            'Generate Receipt',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: isSmallScreen ? 32 : 40),
-              // Action Buttons
-              Center(
-                child: SizedBox(
-                  width: isSmallScreen ? double.infinity : 280,
-                  child: ElevatedButton(
-                    onPressed: () => _generateReceipt(context),
-                    style: ElevatedButton.styleFrom(
-                      padding: buttonPadding,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.receipt),
-                        SizedBox(width: isSmallScreen ? 6 : 8),
-                        Text(
-                          'Generate Receipt',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 14 : 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: isSmallScreen ? 24 : 32),
-            ],
+                SizedBox(height: isSmallScreen ? 24 : 32),
+              ],
+            ),
           ),
         ),
       ),
@@ -615,5 +621,62 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save());
+  }
+
+  double _calculateAverageDaily(double totalQuantity, List<MilkRecord> records,
+      TimePeriod period, DateTime? customMonthStartDate) {
+    if (totalQuantity == 0) return 0.0;
+
+    int daysCount;
+
+    switch (period) {
+      case TimePeriod.allTime:
+        // Count unique days with records
+        final uniqueDays = records
+            .map((record) =>
+                DateTime(record.date.year, record.date.month, record.date.day))
+            .toSet()
+            .length;
+        daysCount = uniqueDays > 0 ? uniqueDays : 1;
+        break;
+
+      case TimePeriod.thisWeek:
+        // Use 7 days for this week
+        daysCount = 7;
+        break;
+
+      case TimePeriod.thisMonth:
+        if (customMonthStartDate != null) {
+          // For custom month, count actual days with records in that period
+          final startDate = DateTime(
+              customMonthStartDate.year, customMonthStartDate.month, 1);
+          final endDate = DateTime(
+              customMonthStartDate.year, customMonthStartDate.month + 1, 1);
+
+          final monthRecords = records.where((record) =>
+              record.date
+                  .isAfter(startDate.subtract(const Duration(days: 1))) &&
+              record.date.isBefore(endDate));
+
+          final uniqueDays = monthRecords
+              .map((record) => DateTime(
+                  record.date.year, record.date.month, record.date.day))
+              .toSet()
+              .length;
+          daysCount = uniqueDays > 0 ? uniqueDays : 1;
+        } else {
+          // For current month, use actual days in month
+          final now = DateTime.now();
+          daysCount = DateTime(now.year, now.month + 1, 0).day;
+        }
+        break;
+
+      case TimePeriod.today:
+        // Today is always 1 day
+        daysCount = 1;
+        break;
+    }
+
+    return totalQuantity / daysCount;
   }
 }

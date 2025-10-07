@@ -1,5 +1,6 @@
 import 'package:dairykhata/pages/add_record_bottom_sheet.dart';
 import 'package:dairykhata/pages/home_page.dart';
+import 'package:dairykhata/pages/insights_page.dart';
 import 'package:dairykhata/pages/settings_page.dart';
 import 'package:dairykhata/pages/view_records_page.dart';
 import 'package:dairykhata/utils/responsive_utils.dart';
@@ -49,7 +50,7 @@ class _MainNavigationState extends State<MainNavigation> {
   static final List<Widget> _pages = <Widget>[
     const HomePage(),
     const ViewRecordsPage(),
-    const HomePage(), // Insights - using HomePage for now since it has insights
+    const InsightsPage(),
     const SettingsPage(),
   ];
 

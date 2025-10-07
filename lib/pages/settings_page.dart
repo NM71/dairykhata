@@ -76,129 +76,135 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: const Text('Settings'),
         centerTitle: true,
       ),
-      body: ListView(
-        children: [
-          ExpansionTile(
-            title: const Text('Milk Rates'),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 86),
+          child: ListView(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Cow Milk Rate',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      controller: _cowRateController,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Buffalo Milk Rate',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      controller: _buffaloRateController,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _saveRates,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+              ExpansionTile(
+                title: const Text('Milk Rates'),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'Cow Milk Rate',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          controller: _cowRateController,
                         ),
-                        child: const Text('Save Rates'),
-                      ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'Buffalo Milk Rate',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          controller: _buffaloRateController,
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _saveRates,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: const Text('Save Rates'),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ],
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('Week Start Day'),
+                subtitle: Text(_getDayName(weekStartDay)),
+                trailing: DropdownButton<int>(
+                  value: weekStartDay,
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text('Monday')),
+                    DropdownMenuItem(value: 2, child: Text('Tuesday')),
+                    DropdownMenuItem(value: 3, child: Text('Wednesday')),
+                    DropdownMenuItem(value: 4, child: Text('Thursday')),
+                    DropdownMenuItem(value: 5, child: Text('Friday')),
+                    DropdownMenuItem(value: 6, child: Text('Saturday')),
+                    DropdownMenuItem(value: 7, child: Text('Sunday')),
                   ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .updateWeekStartDay(value);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                'Week start day updated to ${_getDayName(value)}')),
+                      );
+                    }
+                  },
                 ),
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('Theme'),
+                subtitle: Text(themeMode == ThemeMode.light ? 'Light' : 'Dark'),
+                trailing: Switch(
+                  value: themeMode == ThemeMode.dark,
+                  onChanged: (value) {
+                    ref.read(themeModeNotifierProvider.notifier).toggleTheme();
+                  },
+                ),
+              ),
+              const Divider(),
+              // Mock settings
+              ListTile(
+                title: const Text('Language'),
+                subtitle: const Text('English (Mock)'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  // Mock - could show language selection
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Language selection coming soon!')),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('Export Data'),
+                subtitle: const Text('Export records to file'),
+                trailing: const Icon(Icons.download),
+                onTap: () {
+                  // Mock - could export data
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Export feature coming soon!')),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('About'),
+                subtitle: const Text('App version and info'),
+                trailing: const Icon(Icons.info),
+                onTap: () {
+                  showAboutDialog(
+                    context: context,
+                    applicationName: 'Dairy Khata',
+                    applicationVersion: '1.0.0',
+                    applicationLegalese: '© 2025 Dairy Khata Team',
+                  );
+                },
               ),
             ],
           ),
-          const Divider(),
-          ListTile(
-            title: const Text('Week Start Day'),
-            subtitle: Text(_getDayName(weekStartDay)),
-            trailing: DropdownButton<int>(
-              value: weekStartDay,
-              items: [
-                const DropdownMenuItem(value: 1, child: Text('Monday')),
-                const DropdownMenuItem(value: 2, child: const Text('Tuesday')),
-                const DropdownMenuItem(value: 3, child: Text('Wednesday')),
-                const DropdownMenuItem(value: 4, child: Text('Thursday')),
-                const DropdownMenuItem(value: 5, child: Text('Friday')),
-                const DropdownMenuItem(value: 6, child: Text('Saturday')),
-                const DropdownMenuItem(value: 7, child: Text('Sunday')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  ref
-                      .read(settingsNotifierProvider.notifier)
-                      .updateWeekStartDay(value);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(
-                            'Week start day updated to ${_getDayName(value)}')),
-                  );
-                }
-              },
-            ),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('Theme'),
-            subtitle: Text(themeMode == ThemeMode.light ? 'Light' : 'Dark'),
-            trailing: Switch(
-              value: themeMode == ThemeMode.dark,
-              onChanged: (value) {
-                ref.read(themeModeNotifierProvider.notifier).toggleTheme();
-              },
-            ),
-          ),
-          const Divider(),
-          // Mock settings
-          ListTile(
-            title: const Text('Language'),
-            subtitle: const Text('English (Mock)'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              // Mock - could show language selection
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Language selection coming soon!')),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('Export Data'),
-            subtitle: const Text('Export records to file'),
-            trailing: const Icon(Icons.download),
-            onTap: () {
-              // Mock - could export data
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export feature coming soon!')),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('About'),
-            subtitle: const Text('App version and info'),
-            trailing: const Icon(Icons.info),
-            onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'Dairy Khata',
-                applicationVersion: '1.0.0',
-                applicationLegalese: '© 2025 Dairy Khata Team',
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
