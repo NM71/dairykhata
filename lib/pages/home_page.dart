@@ -1,5 +1,6 @@
 import 'package:dairykhata/models/milk_type_adapter.dart';
 import 'package:dairykhata/providers/providers.dart';
+import 'package:dairykhata/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -7,6 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:shared_preferences/shared_preferences.dart';
+
+enum TimePeriod { allTime, thisWeek, thisMonth, today }
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -16,27 +20,128 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  TimePeriod _selectedPeriod = TimePeriod.allTime;
+  DateTime? _customMonthStartDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedPreferences();
+  }
+
+  Future<void> _loadSavedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPeriodIndex = prefs.getInt('selectedPeriod') ?? 0;
+    final savedMonthStartMillis = prefs.getInt('customMonthStartDate');
+
+    setState(() {
+      _selectedPeriod = TimePeriod.values[savedPeriodIndex];
+      if (savedMonthStartMillis != null) {
+        _customMonthStartDate =
+            DateTime.fromMillisecondsSinceEpoch(savedMonthStartMillis);
+      }
+    });
+  }
+
+  Future<void> _saveSelectedPeriod(TimePeriod period) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedPeriod', period.index);
+  }
+
+  Future<void> _saveCustomMonthStartDate(DateTime? date) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (date != null) {
+      await prefs.setInt('customMonthStartDate', date.millisecondsSinceEpoch);
+    } else {
+      await prefs.remove('customMonthStartDate');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Watch all the providers
+    final records = ref.watch(recordsNotifierProvider);
     final totalQuantity = ref.watch(totalQuantityProvider);
     final totalEarnings = ref.watch(totalEarningsProvider);
-    final recentRecords = ref.watch(recentRecordsCountProvider);
+    final thisWeekQuantity = ref.watch(thisWeekQuantityProvider);
+    final thisWeekEarnings = ref.watch(thisWeekEarningsProvider);
+    final thisMonthQuantity = ref.watch(thisMonthQuantityProvider);
+    final thisMonthEarnings = ref.watch(thisMonthEarningsProvider);
+    final todayQuantity = ref.watch(todayQuantityProvider);
+    final todayEarnings = ref.watch(todayEarningsProvider);
+
+    // Get current values based on selected period
+    double currentQuantity;
+    double currentEarnings;
+
+    switch (_selectedPeriod) {
+      case TimePeriod.allTime:
+        currentQuantity = totalQuantity;
+        currentEarnings = totalEarnings;
+        break;
+      case TimePeriod.thisWeek:
+        currentQuantity = thisWeekQuantity;
+        currentEarnings = thisWeekEarnings;
+        break;
+      case TimePeriod.thisMonth:
+        if (_customMonthStartDate != null) {
+          // Calculate custom month period
+          final startDate = DateTime(
+              _customMonthStartDate!.year, _customMonthStartDate!.month, 1);
+          final endDate = DateTime(
+              _customMonthStartDate!.year, _customMonthStartDate!.month + 1, 1);
+
+          final customMonthRecords = records.where((record) =>
+              record.date
+                  .isAfter(startDate.subtract(const Duration(days: 1))) &&
+              record.date.isBefore(endDate));
+
+          currentQuantity = customMonthRecords.fold(
+              0.0, (sum, record) => sum + record.quantity);
+
+          final settings = ref.read(settingsNotifierProvider);
+          currentEarnings = customMonthRecords.fold(0.0, (sum, record) {
+            final rate = record.type == MilkType.cow
+                ? settings['cowMilkRate']
+                : settings['buffaloMilkRate'];
+            return sum + (record.quantity * rate);
+          });
+        } else {
+          // Use default current month
+          currentQuantity = thisMonthQuantity;
+          currentEarnings = thisMonthEarnings;
+        }
+        break;
+      case TimePeriod.today:
+        currentQuantity = todayQuantity;
+        currentEarnings = todayEarnings;
+        break;
+    }
 
     print(
-        '🏠 HomePage: Building with totalQuantity=$totalQuantity, totalEarnings=$totalEarnings, recentRecords=$recentRecords');
+        '🏠 HomePage: Building with period=${_selectedPeriod.name}, quantity=$currentQuantity, earnings=$currentEarnings');
+
+    // Get screen size for responsive design
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final titleFontSize = isSmallScreen ? 28.0 : 40.0;
+    final buttonPadding = isSmallScreen
+        ? const EdgeInsets.symmetric(horizontal: 20, vertical: 12)
+        : const EdgeInsets.symmetric(horizontal: 32, vertical: 16);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-        preferredSize: const Size(double.infinity, 70),
+        preferredSize: Size(double.infinity, isSmallScreen ? 60 : 70),
         child: AppBar(
           backgroundColor: const Color(0xff0e2a62).withOpacity(0.8),
           elevation: 0,
-          title: const Text(
+          title: Text(
             'DairyBook',
             style: TextStyle(
               fontFamily: 'Outfit',
-              fontSize: 40,
+              fontSize: titleFontSize,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
@@ -46,81 +151,166 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(padding),
           child: Column(
             children: [
-              // Insights Cards
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInsightCard(
-                      'Total Milk',
-                      '${totalQuantity.toStringAsFixed(1)} L',
-                      Icons.local_drink,
-                      Colors.blue,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildInsightCard(
-                      'Total Earnings',
-                      'Rs.${totalEarnings.toStringAsFixed(0)}',
-                      Icons.attach_money,
-                      Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInsightCard(
-                      'Recent Records',
-                      '$recentRecords',
-                      Icons.history,
-                      Colors.orange,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildInsightCard(
-                      'This Week',
-                      '${totalQuantity.toStringAsFixed(1)} L',
-                      Icons.calendar_view_week,
-                      Colors.purple,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              // Action Buttons
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () => _generateReceipt(context),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
+              // Single Insights Card with dropdown and two sub-cards
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.receipt, color: Color(0xff113370)),
-                      SizedBox(width: 8),
-                      Text(
-                        'Generate Receipt',
-                        style: TextStyle(
-                            color: Color(0xff113370),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                      // Dropdown selector
+                      Row(
+                        children: [
+                          const Icon(Icons.date_range,
+                              color: Color(0xff0e2a62)),
+                          const SizedBox(width: 8),
+                          DropdownButton<TimePeriod>(
+                            value: _selectedPeriod,
+                            items: const [
+                              DropdownMenuItem(
+                                value: TimePeriod.allTime,
+                                child: Text('All Time'),
+                              ),
+                              DropdownMenuItem(
+                                value: TimePeriod.thisWeek,
+                                child: Text('This Week'),
+                              ),
+                              DropdownMenuItem(
+                                value: TimePeriod.thisMonth,
+                                child: Text('This Month'),
+                              ),
+                              DropdownMenuItem(
+                                value: TimePeriod.today,
+                                child: Text('Today'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedPeriod = value;
+                                  // Reset custom month start date when switching periods
+                                  if (value != TimePeriod.thisMonth) {
+                                    _customMonthStartDate = null;
+                                    _saveCustomMonthStartDate(null);
+                                  }
+                                });
+                                _saveSelectedPeriod(value);
+                              }
+                            },
+                            underline: Container(),
+                            style: TextStyle(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : const Color(0xff0e2a62),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Custom month start date selector
+                      if (_selectedPeriod == TimePeriod.thisMonth) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const SizedBox(width: 32),
+                            Text(
+                              'Month Start: ${_customMonthStartDate != null ? DateFormat('MMM dd, yyyy').format(_customMonthStartDate!) : 'Current Month'}',
+                              style: const TextStyle(
+                                color: Color(0xff0e2a62),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate:
+                                      _customMonthStartDate ?? DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    _customMonthStartDate = picked;
+                                  });
+                                  _saveCustomMonthStartDate(picked);
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.calendar_today,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      // Two cards in a row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildSubCard(
+                              'Total Milk',
+                              '${currentQuantity.toStringAsFixed(1)} L',
+                              Icons.local_drink,
+                              Colors.blue,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildSubCard(
+                              'Total Earnings',
+                              'Rs.${currentEarnings.toStringAsFixed(0)}',
+                              Icons.attach_money,
+                              Colors.green,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
+              SizedBox(height: isSmallScreen ? 32 : 40),
+              // Action Buttons
+              Center(
+                child: SizedBox(
+                  width: isSmallScreen ? double.infinity : 280,
+                  child: ElevatedButton(
+                    onPressed: () => _generateReceipt(context),
+                    style: ElevatedButton.styleFrom(
+                      padding: buttonPadding,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.receipt),
+                        SizedBox(width: isSmallScreen ? 6 : 8),
+                        Text(
+                          'Generate Receipt',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 14 : 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 24 : 32),
             ],
           ),
         ),
@@ -128,33 +318,108 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildInsightCard(
-      String title, String value, IconData icon, Color color) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _buildSubCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: color),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
+            Icon(icon, size: 24, color: color),
+            const SizedBox(height: 4),
+            Flexible(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               title,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 10,
                 color: Theme.of(context).textTheme.bodySmall?.color,
               ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInsightCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    bool isCompact = false,
+  }) {
+    // Fixed height to ensure consistent card sizes
+    final cardHeight = isCompact ? 120.0 : 140.0;
+    final iconSize = isCompact ? 28.0 : 32.0;
+    final valueFontSize = isCompact ? 18.0 : 20.0;
+    final titleFontSize = isCompact ? 12.0 : 14.0;
+    final padding = isCompact ? 12.0 : 16.0;
+
+    return SizedBox(
+      height: cardHeight,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: iconSize, color: color),
+              SizedBox(height: isCompact ? 6 : 8),
+              Flexible(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: valueFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              SizedBox(height: isCompact ? 4 : 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: titleFontSize,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -168,43 +433,21 @@ class _HomePageState extends ConsumerState<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Center(
-            child: Text(
-          'Generate Receipt',
-          style: TextStyle(color: Color(0xff113370)),
-        )),
+        title: const Center(child: Text('Generate Receipt')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => _generateAndPrintReceipt(7),
-                child: const Text(
-                  'Last 7 days',
-                  style: TextStyle(color: Color(0xff113370)),
-                ),
-              ),
+            TextButton(
+              onPressed: () => _generateAndPrintReceipt(7),
+              child: const Text('Last 7 days'),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => _generateAndPrintReceipt(30),
-                child: const Text(
-                  'Last 30 days',
-                  style: TextStyle(color: Color(0xff113370)),
-                ),
-              ),
+            TextButton(
+              onPressed: () => _generateAndPrintReceipt(30),
+              child: const Text('Last 30 days'),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => _showCustomDateRangeDialog(context),
-                child: const Text(
-                  'Custom Date Range',
-                  style: TextStyle(color: Color(0xff113370)),
-                ),
-              ),
+            TextButton(
+              onPressed: () => _showCustomDateRangeDialog(context),
+              child: const Text('Custom Date Range'),
             ),
           ],
         ),
@@ -219,14 +462,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Select Date Range',
-          style: TextStyle(color: Color(0xff113370)),
-        ),
+        title: const Text('Select Date Range'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(
+            TextButton(
               onPressed: () async {
                 final picked = await showDateRangePicker(
                   context: context,
@@ -240,21 +480,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                   endDate = picked.end;
                 }
               },
-              child: const Text(
-                'Select Dates',
-                style: TextStyle(color: Color(0xff113370)),
-              ),
+              child: const Text('Select Dates'),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 _generateAndPrintReceipt(null,
                     startDate: startDate, endDate: endDate);
               },
-              child: const Text(
-                'Generate Receipt',
-                style: TextStyle(color: Color(0xff113370)),
-              ),
+              child: const Text('Generate Receipt'),
             ),
           ],
         ),
@@ -340,9 +574,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     records.sort((a, b) => a.date.compareTo(b.date));
 
-    // Group records by date
-    final groupedRecords = _groupRecordsByDate(records);
-
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -353,70 +584,29 @@ class _HomePageState extends ConsumerState<HomePage> {
             children: [
               pw.Text('Dairy Book Receipt',
                   style: pw.TextStyle(
-                    fontSize: 25,
-                    fontWeight: pw.FontWeight.bold,
-                  )),
+                      fontSize: 25, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 20),
               pw.Text('From: ${DateFormat('yyyy-MM-dd').format(startDate!)}'),
               pw.Text('To: ${DateFormat('yyyy-MM-dd').format(endDate!)}'),
               pw.SizedBox(height: 20),
               pw.TableHelper.fromTextArray(
-                headers: [
-                  'Date',
-                  'Type',
-                  'Total Quantity',
-                  'Rate',
-                  'Total Amount'
-                ],
-                data: groupedRecords.entries.expand((entry) {
-                  final date = entry.key;
-                  final recordsForDate = entry.value;
-
-                  // Rows for the date (cow and buffalo milk separated)
-                  List<List<String>> rows = [];
-
-                  double cowTotalQuantity = 0;
-                  double buffaloTotalQuantity = 0;
-                  for (var record in recordsForDate) {
-                    if (record.type == MilkType.cow) {
-                      cowTotalQuantity += record.quantity;
-                    } else if (record.type == MilkType.buffalo) {
-                      buffaloTotalQuantity += record.quantity;
-                    }
-                  }
-
-                  final cowTotalAmount = cowTotalQuantity * cowRate;
-                  final buffaloTotalAmount = buffaloTotalQuantity * buffaloRate;
-
-                  // Add row for cow milk (if exists)
-                  if (cowTotalQuantity > 0) {
-                    rows.add([
-                      DateFormat('yyyy-MM-dd')
-                          .format(date), // Only show date for the first row
-                      'Cow',
-                      cowTotalQuantity.toStringAsFixed(2),
-                      cowRate.toStringAsFixed(2),
-                      cowTotalAmount.toStringAsFixed(2),
-                    ]);
-                  }
-
-                  // Add row for buffalo milk (if exists), but leave date column empty
-                  if (buffaloTotalQuantity > 0) {
-                    rows.add([
-                      '', // Leave date empty
-                      'Buffalo',
-                      buffaloTotalQuantity.toStringAsFixed(2),
-                      buffaloRate.toStringAsFixed(2),
-                      buffaloTotalAmount.toStringAsFixed(2),
-                    ]);
-                  }
-
-                  return rows;
+                headers: ['Date', 'Type', 'Quantity', 'Rate', 'Amount'],
+                data: records.map((record) {
+                  final rate =
+                      record.type == MilkType.cow ? cowRate : buffaloRate;
+                  final amount = record.quantity * rate;
+                  return [
+                    DateFormat('yyyy-MM-dd').format(record.date),
+                    record.type == MilkType.cow ? 'Cow' : 'Buffalo',
+                    record.quantity.toString(),
+                    rate.toStringAsFixed(2),
+                    amount.toStringAsFixed(2),
+                  ];
                 }).toList(),
               ),
               pw.SizedBox(height: 20),
               pw.Text(
-                  'Total Amount: ${records.fold<double>(0, (sum, record) => sum + record.quantity * (record.type == MilkType.cow ? cowRate : buffaloRate)).toStringAsFixed(2)}'),
+                  'Total Amount: Rs ${records.fold<double>(0, (sum, record) => sum + record.quantity * (record.type == MilkType.cow ? cowRate : buffaloRate)).toStringAsFixed(2)}'),
             ],
           );
         },
@@ -425,20 +615,5 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save());
-  }
-
-  Map<DateTime, List<MilkRecord>> _groupRecordsByDate(
-      List<MilkRecord> records) {
-    final Map<DateTime, List<MilkRecord>> groupedRecords = {};
-    for (var record in records) {
-      final date =
-          DateTime(record.date.year, record.date.month, record.date.day);
-      if (groupedRecords.containsKey(date)) {
-        groupedRecords[date]!.add(record);
-      } else {
-        groupedRecords[date] = [record];
-      }
-    }
-    return groupedRecords;
   }
 }

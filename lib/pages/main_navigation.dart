@@ -2,13 +2,14 @@ import 'package:dairykhata/pages/add_record_bottom_sheet.dart';
 import 'package:dairykhata/pages/home_page.dart';
 import 'package:dairykhata/pages/settings_page.dart';
 import 'package:dairykhata/pages/view_records_page.dart';
+import 'package:dairykhata/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 class NavBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    final notchRadius = 35.0; // Radius of the cutout
+    const notchRadius = 35.0; // Radius of the cutout
     final notchCenterX = size.width / 2;
 
     // Start from top left
@@ -18,7 +19,7 @@ class NavBarClipper extends CustomClipper<Path> {
     // Create the curved notch
     path.arcToPoint(
       Offset(notchCenterX + notchRadius, 0),
-      radius: Radius.circular(notchRadius),
+      radius: const Radius.circular(notchRadius),
       clockwise: false,
     );
 
@@ -91,8 +92,8 @@ class _MainNavigationState extends State<MainNavigation> {
             // Floating Add Button
             Positioned(
               bottom: 80, // Position above the nav bar
-              left: MediaQuery.of(context).size.width / 2 -
-                  28, // Center horizontally
+              left: ResponsiveUtils.getFabLeftPosition(
+                  context, 56), // Center horizontally
               child: FloatingActionButton(
                 onPressed: _onAddRecordPressed,
                 backgroundColor: const Color(0xff113370),
@@ -102,13 +103,13 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
             // Bottom Navigation Bar with Cutout
             Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
+              bottom: ResponsiveUtils.getNavBarPadding(context).bottom,
+              left: ResponsiveUtils.getNavBarPadding(context).left,
+              right: ResponsiveUtils.getNavBarPadding(context).right,
               child: Container(
                 height: 70,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(35),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),

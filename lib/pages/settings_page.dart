@@ -44,9 +44,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  String _getDayName(int day) {
+    switch (day) {
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return 'Monday';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeNotifierProvider);
+    final settings = ref.watch(settingsNotifierProvider);
+    final weekStartDay = settings['weekStartDay'] as int;
 
     return Scaffold(
       appBar: AppBar(
@@ -94,6 +117,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
               ),
             ],
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text('Week Start Day'),
+            subtitle: Text(_getDayName(weekStartDay)),
+            trailing: DropdownButton<int>(
+              value: weekStartDay,
+              items: [
+                const DropdownMenuItem(value: 1, child: Text('Monday')),
+                const DropdownMenuItem(value: 2, child: const Text('Tuesday')),
+                const DropdownMenuItem(value: 3, child: Text('Wednesday')),
+                const DropdownMenuItem(value: 4, child: Text('Thursday')),
+                const DropdownMenuItem(value: 5, child: Text('Friday')),
+                const DropdownMenuItem(value: 6, child: Text('Saturday')),
+                const DropdownMenuItem(value: 7, child: Text('Sunday')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  ref
+                      .read(settingsNotifierProvider.notifier)
+                      .updateWeekStartDay(value);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Week start day updated to ${_getDayName(value)}')),
+                  );
+                }
+              },
+            ),
           ),
           const Divider(),
           ListTile(

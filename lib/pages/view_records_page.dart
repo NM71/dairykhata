@@ -28,7 +28,8 @@ class ViewRecordsPage extends StatelessWidget {
                 title: Text(DateFormat('yyyy-MM-dd').format(date)),
                 children: records.map((record) {
                   return ListTile(
-                    title: Text(record.type == MilkType.cow ? 'Cow' : 'Buffalo'),
+                    title:
+                        Text(record.type == MilkType.cow ? 'Cow' : 'Buffalo'),
                     subtitle: Text('Quantity: ${record.quantity} liters'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
@@ -63,13 +64,14 @@ class ViewRecordsPage extends StatelessWidget {
 //   }
 // }
 
-
-  Map<DateTime, List<MilkRecord>> _groupRecordsByDate(List<MilkRecord> records) {
+  Map<DateTime, List<MilkRecord>> _groupRecordsByDate(
+      List<MilkRecord> records) {
     final Map<DateTime, List<MilkRecord>> groupedRecords = {};
 
     // Group records by date
     for (var record in records) {
-      final date = DateTime(record.date.year, record.date.month, record.date.day);
+      final date =
+          DateTime(record.date.year, record.date.month, record.date.day);
       if (groupedRecords.containsKey(date)) {
         groupedRecords[date]!.add(record);
       } else {
@@ -80,8 +82,9 @@ class ViewRecordsPage extends StatelessWidget {
     // Sort dates in descending order (recent dates first)
     final sortedRecords = SplayTreeMap<DateTime, List<MilkRecord>>.from(
       groupedRecords,
-          (a, b) => b.compareTo(a),  // Compare in reverse order
+      (a, b) => b.compareTo(a), // Compare in reverse order
     );
 
     return sortedRecords;
-  }}
+  }
+}
