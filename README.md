@@ -36,7 +36,8 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
   </tr>
   <tr>
     <td><img src="screenshots/IMG-20241019-WA0010.jpg" width="200"/></td>
-    <td><img src="screenshots/IMG-20241019-WA0009.jpg" width="200"/></td>
+    <td><img src="<img width="544" height="941" alt="image" src="https://github.com/user-attachments/assets/603f94fc-0b95-4b0a-a008-533e8ba7da97" />
+" width="200"/></td>
     <td><img src="screenshots/WhatsApp Image 2024-10-19 at 14.36.27_6431d8d4.jpg" width="200"/></td>
   </tr>
   <tr>
