@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -68,8 +69,10 @@ class RecordsNotifier extends _$RecordsNotifier {
   }
 
   void addRecord(MilkRecord record) {
-    print(
-        '🔥 RecordsNotifier: Adding record - ${record.quantity}L ${record.type}');
+    if (kDebugMode) {
+      print(
+          '🔥 RecordsNotifier: Adding record - ${record.quantity}L ${record.type}');
+    }
     final box = Hive.box<MilkRecord>('records');
     box.add(record);
     // Update state with new list to trigger rebuilds
@@ -86,15 +89,17 @@ class RecordsNotifier extends _$RecordsNotifier {
 
 // Computed providers for insights
 @riverpod
-double totalQuantity(TotalQuantityRef ref) {
+double totalQuantity(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final total = records.fold(0.0, (sum, record) => sum + record.quantity);
-  print('📊 totalQuantity computed: $total L');
+  if (kDebugMode) {
+    print('📊 totalQuantity computed: $total L');
+  }
   return total;
 }
 
 @riverpod
-double totalEarnings(TotalEarningsRef ref) {
+double totalEarnings(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final settings = ref.watch(settingsNotifierProvider);
   final total = records.fold(0.0, (sum, record) {
@@ -103,21 +108,25 @@ double totalEarnings(TotalEarningsRef ref) {
         : settings['buffaloMilkRate'];
     return sum + (record.quantity * rate);
   });
-  print('💰 totalEarnings computed: ₹$total');
+  if (kDebugMode) {
+    print('💰 totalEarnings computed: ₹$total');
+  }
   return total;
 }
 
 @riverpod
-int recentRecordsCount(RecentRecordsCountRef ref) {
+int recentRecordsCount(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final weekAgo = DateTime.now().subtract(const Duration(days: 7));
   final count = records.where((record) => record.date.isAfter(weekAgo)).length;
-  print('📅 recentRecordsCount computed: $count');
+  if (kDebugMode) {
+    print('📅 recentRecordsCount computed: $count');
+  }
   return count;
 }
 
 @riverpod
-double thisWeekQuantity(ThisWeekQuantityRef ref) {
+double thisWeekQuantity(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final settings = ref.watch(settingsNotifierProvider);
   final weekStartDay = settings['weekStartDay'] as int;
@@ -135,13 +144,15 @@ double thisWeekQuantity(ThisWeekQuantityRef ref) {
 
   final total =
       thisWeekRecords.fold(0.0, (sum, record) => sum + record.quantity);
-  print(
-      '📅 thisWeekQuantity computed: $total L (week starts on day $weekStartDay)');
+  if (kDebugMode) {
+    print(
+        '📅 thisWeekQuantity computed: $total L (week starts on day $weekStartDay)');
+  }
   return total;
 }
 
 @riverpod
-double todayQuantity(TodayQuantityRef ref) {
+double todayQuantity(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -151,12 +162,14 @@ double todayQuantity(TodayQuantityRef ref) {
       record.date.isBefore(today.add(const Duration(days: 1))));
 
   final total = todayRecords.fold(0.0, (sum, record) => sum + record.quantity);
-  print('📅 todayQuantity computed: $total L');
+  if (kDebugMode) {
+    print('📅 todayQuantity computed: $total L');
+  }
   return total;
 }
 
 @riverpod
-double todayEarnings(TodayEarningsRef ref) {
+double todayEarnings(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final settings = ref.watch(settingsNotifierProvider);
   final now = DateTime.now();
@@ -172,12 +185,14 @@ double todayEarnings(TodayEarningsRef ref) {
         : settings['buffaloMilkRate'];
     return sum + (record.quantity * rate);
   });
-  print('💰 todayEarnings computed: ₹$total');
+  if (kDebugMode) {
+    print('💰 todayEarnings computed: ₹$total');
+  }
   return total;
 }
 
 @riverpod
-double thisWeekEarnings(ThisWeekEarningsRef ref) {
+double thisWeekEarnings(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final settings = ref.watch(settingsNotifierProvider);
   final weekStartDay = settings['weekStartDay'] as int;
@@ -199,13 +214,15 @@ double thisWeekEarnings(ThisWeekEarningsRef ref) {
         : settings['buffaloMilkRate'];
     return sum + (record.quantity * rate);
   });
-  print(
-      '💰 thisWeekEarnings computed: ₹$total (week starts on day $weekStartDay)');
+  if (kDebugMode) {
+    print(
+        '💰 thisWeekEarnings computed: ₹$total (week starts on day $weekStartDay)');
+  }
   return total;
 }
 
 @riverpod
-double thisMonthQuantity(ThisMonthQuantityRef ref) {
+double thisMonthQuantity(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final now = DateTime.now();
   final monthStart = DateTime(now.year, now.month, 1);
@@ -216,12 +233,14 @@ double thisMonthQuantity(ThisMonthQuantityRef ref) {
 
   final total =
       thisMonthRecords.fold(0.0, (sum, record) => sum + record.quantity);
-  print('📅 thisMonthQuantity computed: $total L');
+  if (kDebugMode) {
+    print('📅 thisMonthQuantity computed: $total L');
+  }
   return total;
 }
 
 @riverpod
-double thisMonthEarnings(ThisMonthEarningsRef ref) {
+double thisMonthEarnings(Ref ref) {
   final records = ref.watch(recordsNotifierProvider);
   final settings = ref.watch(settingsNotifierProvider);
   final now = DateTime.now();
@@ -237,6 +256,8 @@ double thisMonthEarnings(ThisMonthEarningsRef ref) {
         : settings['buffaloMilkRate'];
     return sum + (record.quantity * rate);
   });
-  print('💰 thisMonthEarnings computed: ₹$total');
+  if (kDebugMode) {
+    print('💰 thisMonthEarnings computed: ₹$total');
+  }
   return total;
 }

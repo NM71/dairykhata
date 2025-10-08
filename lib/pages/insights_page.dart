@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:dairykhata/models/milk_type_adapter.dart';
 import 'package:dairykhata/providers/providers.dart';
-import 'package:dairykhata/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +24,7 @@ class InsightsPage extends ConsumerWidget {
       appBar: PreferredSize(
         preferredSize: Size(double.infinity, isSmallScreen ? 60 : 70),
         child: AppBar(
-          backgroundColor: const Color(0xff0e2a62).withOpacity(0.8),
+          backgroundColor: const Color(0xff0e2a62).withValues(alpha: 0.8),
           elevation: 0,
           title: Text(
             'Insights',
@@ -58,7 +57,7 @@ class InsightsPage extends ConsumerWidget {
           Icon(
             Icons.insights_outlined,
             size: isSmallScreen ? 80 : 100,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           SizedBox(height: isSmallScreen ? 16 : 24),
           Text(
@@ -66,7 +65,7 @@ class InsightsPage extends ConsumerWidget {
             style: TextStyle(
               fontSize: isSmallScreen ? 20 : 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.withOpacity(0.7),
+              color: Colors.grey.withValues(alpha: 0.7),
             ),
           ),
           SizedBox(height: isSmallScreen ? 8 : 12),
@@ -74,7 +73,7 @@ class InsightsPage extends ConsumerWidget {
             'Add some milk records to see insights',
             style: TextStyle(
               fontSize: isSmallScreen ? 14 : 16,
-              color: Colors.grey.withOpacity(0.6),
+              color: Colors.grey.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -248,8 +247,8 @@ class InsightsPage extends ConsumerWidget {
                   child: Container(
                     height: isSmallScreen ? 40 : 50,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.8),
-                      borderRadius: BorderRadius.only(
+                      color: Colors.blue.withValues(alpha: 0.8),
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(8),
                         bottomLeft: Radius.circular(8),
                       ),
@@ -272,8 +271,8 @@ class InsightsPage extends ConsumerWidget {
                   child: Container(
                     height: isSmallScreen ? 40 : 50,
                     decoration: BoxDecoration(
-                      color: Colors.brown.withOpacity(0.8),
-                      borderRadius: BorderRadius.only(
+                      color: Colors.brown.withValues(alpha: 0.8),
+                      borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(8),
                         bottomRight: Radius.circular(8),
                       ),

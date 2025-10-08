@@ -135,7 +135,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: PreferredSize(
         preferredSize: Size(double.infinity, isSmallScreen ? 60 : 70),
         child: AppBar(
-          backgroundColor: const Color(0xff0e2a62).withOpacity(0.8),
+          backgroundColor: const Color(0xff0e2a62).withValues(alpha: 0.8),
           elevation: 0,
           title: Text(
             'DairyBook',
@@ -333,9 +333,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Container(
       height: 100,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
