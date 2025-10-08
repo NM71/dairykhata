@@ -90,13 +90,14 @@ class _MainNavigationState extends State<MainNavigation> {
         body: Stack(
           children: [
             _pages[_selectedIndex],
-            // Bottom Navigation Bar (solid, no curve)
+            // Bottom Navigation Bar with internal padding
             Positioned(
               bottom: ResponsiveUtils.getNavBarPadding(context).bottom,
               left: ResponsiveUtils.getNavBarPadding(context).left,
               right: ResponsiveUtils.getNavBarPadding(context).right,
               child: Container(
                 height: 70,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(35),
@@ -109,132 +110,147 @@ class _MainNavigationState extends State<MainNavigation> {
                     ),
                   ],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Home
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onItemTapped(0),
-                        child: Container(
-                          height: 70,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.home,
-                                color: _selectedIndex == 0
-                                    ? const Color(0xff113370)
-                                    : Colors.grey,
-                              ),
-                              Text(
-                                'Home',
-                                style: TextStyle(
-                                  fontSize: 12,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Home
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onItemTapped(0),
+                          child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.home,
                                   color: _selectedIndex == 0
                                       ? const Color(0xff113370)
                                       : Colors.grey,
+                                  size: 24,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Home',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: _selectedIndex == 0
+                                        ? const Color(0xff113370)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // Records
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onItemTapped(1),
-                        child: Container(
-                          height: 70,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.list,
-                                color: _selectedIndex == 1
-                                    ? const Color(0xff113370)
-                                    : Colors.grey,
-                              ),
-                              Text(
-                                'Records',
-                                style: TextStyle(
-                                  fontSize: 12,
+                      // Records
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onItemTapped(1),
+                          child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.list,
                                   color: _selectedIndex == 1
                                       ? const Color(0xff113370)
                                       : Colors.grey,
+                                  size: 24,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Records',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: _selectedIndex == 1
+                                        ? const Color(0xff113370)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // Spacer for button
-                    const SizedBox(width: 80),
-                    // Insights
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onItemTapped(2),
-                        child: Container(
-                          height: 70,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.insights,
-                                color: _selectedIndex == 2
-                                    ? const Color(0xff113370)
-                                    : Colors.grey,
-                              ),
-                              Text(
-                                'Insights',
-                                style: TextStyle(
-                                  fontSize: 12,
+                      // Spacer for button
+                      const SizedBox(width: 80),
+                      // Insights
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onItemTapped(2),
+                          child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.insights,
                                   color: _selectedIndex == 2
                                       ? const Color(0xff113370)
                                       : Colors.grey,
+                                  size: 24,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Insights',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: _selectedIndex == 2
+                                        ? const Color(0xff113370)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // Settings
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onItemTapped(3),
-                        child: Container(
-                          height: 70,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.settings,
-                                color: _selectedIndex == 3
-                                    ? const Color(0xff113370)
-                                    : Colors.grey,
-                              ),
-                              Text(
-                                'Settings',
-                                style: TextStyle(
-                                  fontSize: 12,
+                      // Settings
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onItemTapped(3),
+                          child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.settings,
                                   color: _selectedIndex == 3
                                       ? const Color(0xff113370)
                                       : Colors.grey,
+                                  size: 24,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Settings',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: _selectedIndex == 3
+                                        ? const Color(0xff113370)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
