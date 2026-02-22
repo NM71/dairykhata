@@ -35,9 +35,9 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
     <td><strong>Add Record</strong></td>
   </tr>
   <tr>
-    <td><img src="screenshots/SplashScreen.jpg" width="200"/></td>
-    <td><img src="screenshots/HomePage.png" width="200"/></td>
-    <td><img src="screenshots/AddNewRecord.png" width="200"/></td>
+    <td><img src="screenshots/SplashScreen.jpg" width="250"/></td>
+    <td><img src="screenshots/HomePage.png" width="250"/></td>
+    <td><img src="screenshots/AddNewRecord.png" width="250"/></td>
   </tr>
   <tr>
     <td><strong>Records View</strong></td>
@@ -45,9 +45,9 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
     <td><strong>Receipt Generation</strong></td>
   </tr>
   <tr>
-    <td><img src="screenshots/RecordsPage.png" width="200"/></td>
-    <td><img src="screenshots/Settings.png" width="200"/></td>
-    <td><img src="screenshots/GenerateReceipt.jpg" width="200"/></td>
+    <td><img src="screenshots/RecordsPage.png" width="250"/></td>
+    <td><img src="screenshots/Settings.png" width="250"/></td>
+    <td><img src="screenshots/GenerateReceipt.jpg" width="250"/></td>
   </tr>
 </table>
 
