@@ -50,7 +50,7 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
     <td><img src="screenshots/GenerateReceipt.jpg" width="250"/></td>
   </tr>
    <tr>
-    <td><img width="632" height="1280" alt="IMG-20241019-WA0006" src="https://github.com/user-attachments/assets/9f266924-fbd6-4a2e-b522-3331a8b7dca4" />
+    <td><img width="250" src="https://github.com/user-attachments/assets/9f266924-fbd6-4a2e-b522-3331a8b7dca4" />
 </td>
     
   </tr>
