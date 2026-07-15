@@ -1,4 +1,4 @@
-# 🥛 Dairy Khata
+# Dairy Khata
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.5+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.5+-0175C2?style=flat&logo=dart&logoColor=white)](https://dart.dev)
@@ -6,18 +6,18 @@
 
 A comprehensive Flutter application designed for dairy farmers and milk sellers to efficiently manage their business operations. Perfect for rural dairy businesses with offline-first functionality.
 
-## ✨ Features
+## Features
 
-- **📊 Dashboard Analytics** - Real-time insights on milk production, earnings, and performance
-- **➕ Record Management** - Easy CRUD operations for milk collection records
-- **🧾 Receipt Generation** - PDF receipts based on custom time periods
-- **💰 Custom Pricing** - Flexible milk rates for different types (Cow/Buffalo)
-- **📱 Offline Storage** - Local data persistence with Hive database
-- **📈 Insights & Reports** - Production analytics and performance tracking
-- **🌙 Dark/Light Theme** - Modern UI with theme switching
-- **📅 Timeline Filtering** - View records by day, week, month, or custom periods
+- ** Dashboard Analytics** - Real-time insights on milk production, earnings, and performance
+- ** Record Management** - Easy CRUD operations for milk collection records
+- ** Receipt Generation** - PDF receipts based on custom time periods
+- ** Custom Pricing** - Flexible milk rates for different types (Cow/Buffalo)
+- ** Offline Storage** - Local data persistence with Hive database
+- ** Insights & Reports** - Production analytics and performance tracking
+- ** Dark/Light Theme** - Modern UI with theme switching
+- ** Timeline Filtering** - View records by day, week, month, or custom periods
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Framework:** Flutter 3.5+
 - **Language:** Dart 3.5+
@@ -26,7 +26,7 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
 - **PDF Generation:** pdf + printing packages
 - **UI:** Material Design 3
 
-## 📸 Screenshots
+## Screenshots
 
 <table>
   <tr>
@@ -48,6 +48,11 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
     <td><img src="screenshots/RecordsPage.png" width="250"/></td>
     <td><img src="screenshots/Settings.png" width="250"/></td>
     <td><img src="screenshots/GenerateReceipt.jpg" width="250"/></td>
+  </tr>
+   <tr>
+    <td><img src="<img width="632" height="1280" alt="IMG-20241019-WA0006" src="https://github.com/user-attachments/assets/287015d5-24d1-499d-abde-c73a1be50fa9" />
+" width="250"/></td>
+    
   </tr>
 </table>
 
@@ -80,7 +85,7 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
    flutter run
    ```
 
-## 📱 Usage
+## Usage
 
 1. **Launch the app** and you'll see the beautiful splash screen
 2. **Set milk rates** in Settings for Cow and Buffalo milk
@@ -89,26 +94,7 @@ A comprehensive Flutter application designed for dairy farmers and milk sellers 
 5. **Generate receipts** for specific time periods
 6. **Browse records** in chronological order with grouping
 
-## 🏗️ Project Structure
-
-```
-lib/
-├── main.dart                 # App entry point
-├── models/                   # Data models
-│   └── milk_type_adapter.dart
-├── pages/                    # UI screens
-│   ├── home_page.dart
-│   ├── add_record_page.dart
-│   ├── view_records_page.dart
-│   ├── insights_page.dart
-│   ├── settings_page.dart
-│   └── main_navigation.dart
-├── providers/                # State management
-├── theme/                    # App theming
-└── utils/                    # Helper utilities
-```
-
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -118,11 +104,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with ❤️ for dairy farmers
 - Special thanks to the Flutter community
